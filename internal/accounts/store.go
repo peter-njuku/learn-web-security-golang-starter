@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -193,6 +194,10 @@ func (store *Store) CurrentSession(ctx context.Context, token string) (CurrentSe
 	}
 	expiresAt, err := time.Parse(time.RFC3339, row.ExpiresAt)
 	if err != nil || !store.now().Before(expiresAt) {
+		return CurrentSession{}, false, nil
+	}
+	slog.Info("CurrentSession", "token", HashSessionToken(token), "revokedAt", row.RevokedAt)
+	if row.RevokedAt != nil {
 		return CurrentSession{}, false, nil
 	}
 	user, found, err := store.FindUserByID(ctx, row.UserID)
