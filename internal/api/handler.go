@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/bootdotdev/learn-web-security/internal/accounts"
@@ -95,6 +96,19 @@ func (handler *Handler) Products(responseWriter http.ResponseWriter, request *ht
 }
 
 func (handler *Handler) WarehouseOrders(responseWriter http.ResponseWriter, request *http.Request) {
+	apiKey, exists, err := handler.apiStore.FindKey(request.Context(), request.Header.Get("X-API-Key"))
+	if err != nil {
+		handler.internalError(responseWriter, request, err)
+		return
+	}
+	if !exists {
+		httpx.RespondWithError(responseWriter, http.StatusUnauthorized, fmt.Sprint(map[string]string{"message": "missing or invalid api key"}))
+		return
+	}
+	if apiKey.Scope != "orders:read" {
+		httpx.RespondWithError(responseWriter, http.StatusForbidden, fmt.Sprint(map[string]string{"message": "missing or invalid api key"}))
+		return
+	}
 	orders, err := handler.orderStore.ListAll(request.Context())
 	if err != nil {
 		handler.internalError(responseWriter, request, err)

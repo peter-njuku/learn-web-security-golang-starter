@@ -85,3 +85,5 @@ Do not deploy it or use its security patterns in a real application. Its credent
 - `data/uploads/`: contains local uploads and the seeded sample tax exemption PDF
 - `data/bulk-tax-documents/`: receives documents extracted from support ZIP imports
 - `Dockerfile`: defines the initial single-stage container image
+
+Course composed and can be accessed at [boot.dev](https://boot.dev)
