@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 
 	"github.com/bootdotdev/learn-web-security/internal/database/dbgen"
 )
@@ -53,10 +52,11 @@ func (store *Store) ListProducts(ctx context.Context, maxResults int64) ([]Produ
 func (store *Store) SearchProducts(ctx context.Context, query string, maxResults int64) ([]Product, error) {
 	searchSQL := `SELECT id, name, description, image_path, price_cents, cost_cents, inventory_count, is_active, created_at
 		FROM products
-		WHERE is_active = 1 AND (name LIKE '%` + query + `%' OR description LIKE '%` + query + `%')
+		WHERE is_active = 1 AND (name LIKE ? OR description LIKE ?)
 		ORDER BY id
-		LIMIT ` + strconv.FormatInt(maxResults, 10)
-	rows, err := store.database.QueryContext(ctx, searchSQL)
+		LIMIT ?`
+	pattern := "%" + query + "%"
+	rows, err := store.database.QueryContext(ctx, searchSQL, pattern, pattern, maxResults)
 	if err != nil {
 		return nil, fmt.Errorf("search products: %w", err)
 	}
